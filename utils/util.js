@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-18 15:05:31
- * @LastEditTime: 2021-08-18 16:52:55
+ * @LastEditTime: 2021-08-19 14:24:11
  * @LastEditors: Please set LastEditors
  * @Description: 通用工具函数
  * @FilePath: \bloge:\Vue_store\manager-server\utils\util.js
@@ -51,10 +51,11 @@ module.exports = {
    * @param {string} msg
    * @param {number} code
    */  
-  fail (msg='',code=CODE.BUSINESS_ERROR) {
+  fail (msg='',code=CODE.BUSINESS_ERROR, data='') {
     return {
-      msg,
-      code
+      code,
+      data,
+      msg
     }
   }
 }

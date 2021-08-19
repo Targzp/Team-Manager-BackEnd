@@ -1,3 +1,11 @@
+/*
+ * @Author: 胡晨明
+ * @Date: 2021-08-17 20:14:29
+ * @LastEditTime: 2021-08-19 14:42:23
+ * @LastEditors: Please set LastEditors
+ * @Description: 请求入口文件
+ * @FilePath: \bloge:\Vue_store\manager-server\app.js
+ */
 const Koa = require('koa')
 const app = new Koa()
 const views = require('koa-views')
@@ -6,7 +14,9 @@ const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 
-const index = require('./routes/index')
+// 加载数据库
+require('./config/db')
+
 const users = require('./routes/users')
 
 // error handler
@@ -33,7 +43,6 @@ app.use(async (ctx, next) => {
 })
 
 // routes
-app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
 
 // error-handling
