@@ -57,5 +57,6 @@ module.exports = {
       data,
       msg
     }
-  }
+  },
+  CODE
 }

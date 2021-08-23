@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-17 20:14:29
- * @LastEditTime: 2021-08-19 14:42:23
+ * @LastEditTime: 2021-08-22 20:51:55
  * @LastEditors: Please set LastEditors
  * @Description: 请求入口文件
  * @FilePath: \bloge:\Vue_store\manager-server\app.js
@@ -13,6 +13,8 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+const util = require('./utils/util') 
+const koa_jwt = require('koa-jwt')
 
 // 加载数据库
 require('./config/db')
@@ -37,10 +39,22 @@ app.use(views(__dirname + '/views', {
 // logger
 app.use(async (ctx, next) => {
   const start = new Date()
-  await next()
+  await next().catch((err) => {
+    console.log(err)
+    if (err.status == '401') {
+      ctx.status = 200
+      ctx.body = util.fail('Token认证失败', util.CODE.AUTH_ERROR)
+    } else {
+      throw err
+    }
+  })
   const ms = new Date() - start
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 })
+
+app.use(koa_jwt({secret: 'Targzp#32'}).unless({
+  path: [/^\/api\/users\/login/]
+}))
 
 // routes
 app.use(users.routes(), users.allowedMethods())
