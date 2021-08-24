@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-19 12:30:46
- * @LastEditTime: 2021-08-19 12:36:24
+ * @LastEditTime: 2021-08-24 17:48:18
  * @LastEditors: Please set LastEditors
  * @Description: 数据库连接
  * @FilePath: \bloge:\Vue_store\manager-server\config\db.js
@@ -10,7 +10,7 @@ const mongoose = require('mongoose')
 const config = require('./index')
 mongoose.connect(config.URL, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
 })
 
 const db = mongoose.connection
