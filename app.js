@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-17 20:14:29
- * @LastEditTime: 2021-08-22 20:51:55
+ * @LastEditTime: 2021-08-26 16:24:39
  * @LastEditors: Please set LastEditors
  * @Description: 请求入口文件
  * @FilePath: \bloge:\Vue_store\manager-server\app.js
@@ -13,20 +13,21 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
-const util = require('./utils/util') 
+const util = require('./utils/util')
 const koa_jwt = require('koa-jwt')
 
 // 加载数据库
 require('./config/db')
 
 const users = require('./routes/users')
+const menus = require('./routes/menus')
 
 // error handler
 onerror(app)
 
 // middlewares
 app.use(bodyparser({
-  enableTypes:['json', 'form', 'text']
+  enableTypes: ['json', 'form', 'text']
 }))
 app.use(json())
 app.use(logger())
@@ -52,12 +53,16 @@ app.use(async (ctx, next) => {
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 })
 
-app.use(koa_jwt({secret: 'Targzp#32'}).unless({
+app.use(koa_jwt({
+  secret: 'Targzp#32'
+}).unless({
   path: [/^\/api\/users\/login/]
 }))
 
 // routes
 app.use(users.routes(), users.allowedMethods())
+app.use(menus.routes(), menus.allowedMethods())
+
 
 // error-handling
 app.on('error', (err, ctx) => {
