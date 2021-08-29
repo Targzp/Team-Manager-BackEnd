@@ -21,6 +21,7 @@ require('./config/db')
 
 const users = require('./routes/users')
 const menus = require('./routes/menus')
+const roles = require('./routes/roles')
 
 // error handler
 onerror(app)
@@ -62,7 +63,7 @@ app.use(koa_jwt({
 // routes
 app.use(users.routes(), users.allowedMethods())
 app.use(menus.routes(), menus.allowedMethods())
-
+app.use(roles.routes(), roles.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {

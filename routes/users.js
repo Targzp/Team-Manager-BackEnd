@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-17 20:14:29
- * @LastEditTime: 2021-08-24 22:20:18
+ * @LastEditTime: 2021-08-29 16:36:19
  * @LastEditors: Please set LastEditors
  * @Description: 用户管理模块
  * @FilePath: \bloge:\Vue_store\manager-server\routes\users.js
@@ -39,7 +39,7 @@ router.post('/login', async (ctx, next) => {
       const token = jwt.sign({
         data: doc
       }, 'Targzp#32', {
-        expiresIn: '1h'
+        expiresIn: '1 days'
       })
       doc.token = token
       ctx.body = util.success(doc)

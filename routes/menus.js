@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-26 16:24:51
- * @LastEditTime: 2021-08-26 23:09:03
+ * @LastEditTime: 2021-08-27 15:55:42
  * @LastEditors: Please set LastEditors
  * @Description: 菜单管理模块
  * @FilePath: \manager-server\routes\menus.js
@@ -21,6 +21,7 @@ router.get('/list', async (ctx, next) => {
         menuState
     } = ctx.request.query
     const params = {}
+    let permissionList = []
     if (menuName) {
         params.menuName = menuName
     }
@@ -28,7 +29,11 @@ router.get('/list', async (ctx, next) => {
         params.menuState = menuState
     }
     const rootList = await Menu.find(params) || [] // 先获取全部的菜单列表
-    const permissionList = getTreeMenu(rootList, null, []) // 先提取第一级菜单
+    if (rootList.length > 0 && menuState == 2 && rootList[0].menuState === 2) {
+        permissionList = getTreeMenu(rootList, rootList[0].parentId[0], [])
+    } else {
+        permissionList = getTreeMenu(rootList, null, []) // 提取第一级菜单
+    }
     ctx.body = util.success(permissionList)
 })
 
