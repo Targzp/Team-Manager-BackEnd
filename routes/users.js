@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-17 20:14:29
- * @LastEditTime: 2021-08-29 16:36:19
+ * @LastEditTime: 2021-08-30 21:54:31
  * @LastEditors: Please set LastEditors
  * @Description: 用户管理模块
  * @FilePath: \bloge:\Vue_store\manager-server\routes\users.js
@@ -39,7 +39,7 @@ router.post('/login', async (ctx, next) => {
       const token = jwt.sign({
         data: doc
       }, 'Targzp#32', {
-        expiresIn: '1 days'
+        expiresIn: '3d'
       })
       doc.token = token
       ctx.body = util.success(doc)
@@ -91,6 +91,22 @@ router.get('/list', async (ctx, next) => {
       },
       list
     })
+  } catch (error) {
+    ctx.body = util.fail('查询异常 ${error}')
+  }
+})
+
+// 所有用户列表
+router.get('/all/list', async (ctx, next) => {
+  try {
+    // 根据条件查询所有用户列表
+    const list = await Users.find({
+      state: 1
+    }, {
+      _id: 0,
+      userPwd: 0
+    })
+    ctx.body = util.success(list)
   } catch (error) {
     ctx.body = util.fail('查询异常 ${error}')
   }
