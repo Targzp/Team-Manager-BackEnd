@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-17 20:14:29
- * @LastEditTime: 2021-08-26 16:24:39
+ * @LastEditTime: 2021-08-31 15:38:43
  * @LastEditors: Please set LastEditors
  * @Description: 请求入口文件
  * @FilePath: \bloge:\Vue_store\manager-server\app.js
@@ -22,6 +22,7 @@ require('./config/db')
 const users = require('./routes/users')
 const menus = require('./routes/menus')
 const roles = require('./routes/roles')
+const depts = require('./routes/depts')
 
 // error handler
 onerror(app)
@@ -64,6 +65,7 @@ app.use(koa_jwt({
 app.use(users.routes(), users.allowedMethods())
 app.use(menus.routes(), menus.allowedMethods())
 app.use(roles.routes(), roles.allowedMethods())
+app.use(depts.routes(), depts.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {

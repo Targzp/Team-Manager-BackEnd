@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-17 20:14:29
- * @LastEditTime: 2021-08-30 21:54:31
+ * @LastEditTime: 2021-08-31 17:17:58
  * @LastEditors: Please set LastEditors
  * @Description: 用户管理模块
  * @FilePath: \bloge:\Vue_store\manager-server\routes\users.js
@@ -102,10 +102,7 @@ router.get('/all/list', async (ctx, next) => {
     // 根据条件查询所有用户列表
     const list = await Users.find({
       state: 1
-    }, {
-      _id: 0,
-      userPwd: 0
-    })
+    }, "userId userName userEmail")
     ctx.body = util.success(list)
   } catch (error) {
     ctx.body = util.fail('查询异常 ${error}')
