@@ -1,13 +1,15 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-17 20:14:29
- * @LastEditTime: 2021-08-31 17:17:58
+ * @LastEditTime: 2021-09-01 21:58:49
  * @LastEditors: Please set LastEditors
  * @Description: 用户管理模块
  * @FilePath: \bloge:\Vue_store\manager-server\routes\users.js
  */
 const router = require('koa-router')()
 const Users = require('../models/userSchema')
+const Menu = require('../models/menuSchema')
+const Role = require('../models/roleSchema')
 const Counter = require('../models/counterSchema')
 const util = require('../utils/util')
 const jwt = require('jsonwebtoken')
@@ -33,8 +35,10 @@ router.post('/login', async (ctx, next) => {
     const res = await Users.findOne({
       userName,
       userPwd
-    }, 'userId userName userEmail state role deptId rolelIst')
-    if (res.state !== 2) {
+    }, 'userId userName userEmail state role deptId roleList')
+    if (!res) {
+      ctx.body = util.fail('账号或密码不正确')
+    } else if (res.state !== 2) {
       const doc = res._doc
       const token = jwt.sign({
         data: doc
@@ -49,9 +53,55 @@ router.post('/login', async (ctx, next) => {
       ctx.body = util.fail('账号或密码不正确')
     }
   } catch (error) {
+    console.log(error)
     ctx.body = util.fail(error.msg)
   }
 })
+
+// 获取用户对应的权限菜单
+router.get('/getPermissionList', async (ctx, next) => {
+  let auth = ctx.request.headers.authorization
+  let {
+    data
+  } = util.decoded(auth)
+  let menuList = await getMenuList(data.role, data.roleList)
+  ctx.body = util.success(menuList)
+})
+
+async function getMenuList(userRole, roleKeys) {
+  let rootList = []
+  let roleList = []
+  let permissionList = []
+  if (userRole === 0) {
+    rootList = await Menu.find({}) || []
+  } else {
+    // 根据用户拥有的角色获取权限列表
+    // first step：先查找用户对应的角色有哪些
+    roleList = await Role.find({
+      _id: {
+        $in: roleKeys
+      }
+    })
+    // second step: 收集所有角色所拥有的权限（即菜单和按钮）
+    roleList.map(role => {
+      let {
+        checkedKeys,
+        halfCheckedKeys
+      } = role.permissionList
+      permissionList = permissionList.concat([...checkedKeys, ...halfCheckedKeys])
+    })
+    // third step: 角色之间所拥有的权限大概率会重复，进行去重操作
+    permissionList = [...new Set(permissionList)]
+    // forth step: 使用 permissionList 对菜单表进行过滤，返回对应的菜单列表
+    // fifth step: 使用 getTreeMenu 工具函数对过滤后的菜单进行递归，整理成树形结构再返回给客户端
+    rootList = await Menu.find({
+      _id: {
+        $in: permissionList
+      }
+    })
+  }
+  return util.getTreeMenu(rootList, null, [])
+}
 
 // 用户列表
 router.get('/list', async (ctx, next) => {
