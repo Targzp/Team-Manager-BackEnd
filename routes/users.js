@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-17 20:14:29
- * @LastEditTime: 2021-09-01 21:58:49
+ * @LastEditTime: 2021-09-02 22:49:24
  * @LastEditors: Please set LastEditors
  * @Description: 用户管理模块
  * @FilePath: \bloge:\Vue_store\manager-server\routes\users.js
@@ -65,7 +65,11 @@ router.get('/getPermissionList', async (ctx, next) => {
     data
   } = util.decoded(auth)
   let menuList = await getMenuList(data.role, data.roleList)
-  ctx.body = util.success(menuList)
+  let actionList = getActionList(menuList)
+  ctx.body = util.success({
+    menuList,
+    actionList
+  })
 })
 
 async function getMenuList(userRole, roleKeys) {
@@ -73,7 +77,9 @@ async function getMenuList(userRole, roleKeys) {
   let roleList = []
   let permissionList = []
   if (userRole === 0) {
-    rootList = await Menu.find({}) || []
+    rootList = await Menu.find({
+      menuState: 1
+    }) || []
   } else {
     // 根据用户拥有的角色获取权限列表
     // first step：先查找用户对应的角色有哪些
@@ -97,10 +103,29 @@ async function getMenuList(userRole, roleKeys) {
     rootList = await Menu.find({
       _id: {
         $in: permissionList
-      }
+      },
+      menuState: 1
     })
   }
   return util.getTreeMenu(rootList, null, [])
+}
+
+function getActionList(list) {
+  let actionList = []
+  const deep = (arr) => {
+    arr.map((item) => {
+      if (item.action) {
+        item.action.map(item => {
+          actionList.push(item.menuCode) // 注意是按钮标识
+        })
+      }
+      if (item.children && !item.action) {
+        deep(item.children);
+      }
+    });
+  };
+  deep(list);
+  return actionList
 }
 
 // 用户列表
