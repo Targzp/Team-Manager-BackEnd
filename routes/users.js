@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-17 20:14:29
- * @LastEditTime: 2021-09-02 22:49:24
+ * @LastEditTime: 2021-09-03 15:07:12
  * @LastEditors: Please set LastEditors
  * @Description: 用户管理模块
  * @FilePath: \bloge:\Vue_store\manager-server\routes\users.js
@@ -64,7 +64,10 @@ router.get('/getPermissionList', async (ctx, next) => {
   let {
     data
   } = util.decoded(auth)
-  let menuList = await getMenuList(data.role, data.roleList)
+  let user = await Users.findOne({
+    _id: data._id
+  })
+  let menuList = await getMenuList(user.role, user.roleList)
   let actionList = getActionList(menuList)
   ctx.body = util.success({
     menuList,
