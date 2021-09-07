@@ -23,6 +23,7 @@ const users = require('./routes/users')
 const menus = require('./routes/menus')
 const roles = require('./routes/roles')
 const depts = require('./routes/depts')
+const leaves = require('./routes/leaves')
 
 // error handler
 onerror(app)
@@ -66,6 +67,7 @@ app.use(users.routes(), users.allowedMethods())
 app.use(menus.routes(), menus.allowedMethods())
 app.use(roles.routes(), roles.allowedMethods())
 app.use(depts.routes(), depts.allowedMethods())
+app.use(leaves.routes(), leaves.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {
