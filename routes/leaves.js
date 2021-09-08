@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-07 15:28:18
- * @LastEditTime: 2021-09-07 22:32:22
+ * @LastEditTime: 2021-09-08 23:21:04
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \manager-server\routes\leaves.js
@@ -15,7 +15,8 @@ router.prefix('/api/leave')
 
 router.get("/list", async (ctx, next) => {
     const {
-        applyState
+        applyState,
+        type
     } = ctx.request.query
     const {
         page,
@@ -26,11 +27,28 @@ router.get("/list", async (ctx, next) => {
         data
     } = util.decoded(auth)
     try {
-        let params = {
-            "applyUser.userId": data.userId
-        }
-        if (applyState) {
-            params.applyState = applyState
+        let params = {}
+        if (type === "approve") {
+            if (applyState == 1) {
+                params.curAuditUserName = data.userName
+                params.applyState = applyState
+            } else if (applyState > 1) {
+                params = {
+                    "auditFlows.userId": data.userId,
+                    applyState
+                }
+            } else {
+                params = {
+                    "auditFlows.userId": data.userId
+                }
+            }
+        } else {
+            params = {
+                "applyUser.userId": data.userId
+            }
+            if (applyState) {
+                params.applyState = applyState
+            }
         }
         const query = Leave.find(params)
         const list = await query.skip(skipIndex).limit(page.pageSize)
@@ -43,7 +61,7 @@ router.get("/list", async (ctx, next) => {
             list
         })
     } catch (error) {
-        ctx.body = util.fail('查询异常 ${error}')
+        ctx.body = util.fail(`查询异常 ${error}`)
     }
 })
 
@@ -123,6 +141,56 @@ router.post('/operate', async (ctx, next) => {
             console.log(error)
             ctx.body = util.fail(error)
         }
+    }
+})
+
+router.post('/approve', async (ctx, next) => {
+    const {
+        _id,
+        action,
+        remark
+    } = ctx.request.body
+
+    let auth = ctx.request.headers.authorization
+    let {
+        data
+    } = util.decoded(auth)
+    try {
+        let apply = await Leave.findById(_id)
+        let auditLogs = apply.auditLogs || []
+        let auditUsers = apply.auditUsers.split(',')
+        let params = {}
+
+        if (action === "refuse") {
+            // 审批拒绝
+            params.applyState = 3
+        } else {
+            // 审核通过
+            let logCounts = auditLogs.length
+            if (logCounts === 0) {
+                params.applyState = 2
+                params.curAuditUserName = auditUsers[1]
+            } else if (logCounts === 1) {
+                params.curAuditUserName = auditUsers[2]
+            } else if (logCounts === 2) {
+                params.applyState = 4
+            }
+        }
+
+        auditLogs.push({
+            userId: data.userId,
+            userName: data.userName,
+            createTime: util.formateDate(new Date()),
+            remark,
+            action: action === "refuse" ? "审核拒绝" : "审核通过"
+        })
+
+        params.auditLogs = auditLogs
+        let res = await Leave.findByIdAndUpdate(_id, params)
+
+        ctx.body = util.success({})
+    } catch (error) {
+        ctx.body = util.fail(`操作失败:${error}`)
     }
 })
 
