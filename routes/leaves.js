@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2021-09-07 15:28:18
- * @LastEditTime: 2021-09-08 23:21:04
+ * @LastEditTime: 2021-09-09 21:35:00
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \manager-server\routes\leaves.js
@@ -13,6 +13,33 @@ const util = require('../utils/util')
 
 router.prefix('/api/leave')
 
+/**
+ * @description: 获取用户需审批数目
+ */
+router.get('/count', async (ctx, next) => {
+    let auth = ctx.request.headers.authorization
+    let {
+        data
+    } = util.decoded(auth)
+    try {
+        let params = {}
+        params.curAuditUserName = data.userName
+        params.$or = [{
+            applyState: 1
+        }, {
+            applyState: 2
+        }]
+        let total = await Leave.countDocuments(params)
+        ctx.body = util.success(total)
+    } catch (error) {
+        ctx.body = util.fail(`操作失败: ${error}`)
+    }
+})
+
+
+/**
+ * @description: 获取申请/审批列表
+ */
 router.get("/list", async (ctx, next) => {
     const {
         applyState,
@@ -29,10 +56,14 @@ router.get("/list", async (ctx, next) => {
     try {
         let params = {}
         if (type === "approve") {
-            if (applyState == 1) {
+            if (applyState == 1 || applyState == 2) {
                 params.curAuditUserName = data.userName
-                params.applyState = applyState
-            } else if (applyState > 1) {
+                params.$or = [{
+                    applyState: 1
+                }, {
+                    applyState: 2
+                }]
+            } else if (applyState > 2) {
                 params = {
                     "auditFlows.userId": data.userId,
                     applyState
@@ -65,6 +96,9 @@ router.get("/list", async (ctx, next) => {
     }
 })
 
+/**
+ * @description: 申请表的操作
+ */
 router.post('/operate', async (ctx, next) => {
     const {
         _id,
@@ -144,6 +178,9 @@ router.post('/operate', async (ctx, next) => {
     }
 })
 
+/**
+ * @description: 申请审批操作以及审批流的实现
+ */
 router.post('/approve', async (ctx, next) => {
     const {
         _id,
