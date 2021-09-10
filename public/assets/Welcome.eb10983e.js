@@ -1,0 +1,1 @@
+import{o as s,c as t,d as a}from"./vendor.b1d65a4d.js";const d={},e={class:"welcome"},l=[a("div",{class:"content"},[a("div",{class:"sub-title"},"欢迎使用"),a("div",{class:"title"},"通用后台管理系统")],-1),a("div",{class:"img"},null,-1)];d.render=function(a,d){return s(),t("div",e,l)};export{d as default};

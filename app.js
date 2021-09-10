@@ -1,7 +1,7 @@
 /*
  * @Author: 胡晨明
  * @Date: 2021-08-17 20:14:29
- * @LastEditTime: 2021-09-01 17:12:28
+ * @LastEditTime: 2021-09-10 17:23:48
  * @LastEditors: Please set LastEditors
  * @Description: 请求入口文件
  * @FilePath: \bloge:\Vue_store\manager-server\app.js
@@ -13,8 +13,12 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+const koaStatic = require('koa-static')
 const util = require('./utils/util')
 const koa_jwt = require('koa-jwt')
+const path = require('path')
+
+app.use(koaStatic(path.resolve(__dirname, './public')))
 
 // 加载数据库
 require('./config/db')
